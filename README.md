@@ -1,8 +1,9 @@
+
 ## param-enveloper
 
 ----
 
-Finally, a sane way to do complex envelopes in Web Audio.
+Hey look, finally a sane way to automate parameters in Web Audio.
 
 This is a small library for automating changes to a Web Audio 
 [AudioParam](https://developer.mozilla.org/en-US/docs/Web/API/AudioParam)
@@ -33,8 +34,8 @@ enveloper.addRamp(param, R, 0, true)
 ```
 
 The second call to `startEnvelope` calculates what value the param is 
-scheduled to have at `releaseTime` and edits the current envelope so as to 
-end cleanly at that value. Thus the subsequent release ramp runs without discontinuities, even if the release happened during the attack ramp or whatever.
+scheduled to have at `releaseTime` and edits the current envelope to 
+end at that value. This way any subsequent automation happens without discontinuities, even if a release happens during the attack ramp or whatever.
 
 
 ## Usage
@@ -79,6 +80,12 @@ enveloper.initParam(param, baseValue)
    Queries what value the param is scheduled to have at a given time. Useful for 
    e.g. making an attack ramp whose duration depends on the value started from.
 
+> Note: When a sweep is added with non-positive duration, it is treated as 
+an open-ended sweep that lasts forever. Scheduling a ramp or another sweep 
+after this will throw an error. Scheduling a hold is a special case;
+the hold's duration will become the sweep's duration, and further changes 
+can then be scheduled afterwards.
+
 
 ## Notes
 
@@ -87,7 +94,8 @@ If you don't have webpack installed globally, you'll need to do
 `npm i -D webpack webpack-cli webpack-dev-server` or similar.
 
 Currently this lib doesn't do any heavy error checking - 
-doing unexpected things (e.g. starting an envelope in the past before `audioCtx.currentTime`) may throw errors or have undefined behavior.
+doing unexpected things (e.g. scheduling events in the past) 
+might throw errors or have undefined behavior.
 
 ----
 

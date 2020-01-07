@@ -1,7 +1,7 @@
 {
   "name": "param-enveloper",
-  "version": "0.0.1",
-  "description": "A sane way to do complex envelopes in WebAudio",
+  "version": "0.1.0",
+  "description": "A sane way to automate parameters in WebAudio",
   "main": "src/index.js",
   "files": [
     "/src"
@@ -11,6 +11,5 @@
     "start": "cd demo && webpack-dev-server"
   },
   "author": "Andy Hall",
-  "license": "ISC",
-  "devDependencies": {}
+  "license": "ISC"
 }

@@ -78,9 +78,8 @@ function stopSound() {
     var env = audio.enveloper
     var param = audio.param
     env.startEnvelope(param, t)
-    env.addSweep(param, 0, 0, 1)
+    env.addSweep(param, 0, 0, 0.4)
 }
-
 
 function initAudio() {
     var ctx = new AudioContext()
@@ -95,7 +94,7 @@ function initAudio() {
     var enveloper = new Enveloper(ctx)
     enveloper.initParam(param, 0)
     audio = { ctx, enveloper, param, analyzer }
-    sanityCheck(enveloper, ctx.createGain().gain)
+    sanityChecks.forEach(fn => fn(enveloper, ctx.createGain().gain))
 }
 
 
@@ -106,9 +105,10 @@ function initAudio() {
 
 
 // run some baseline tests
-// note this only checks the internals, not the actual param behavior
-function sanityCheck(env, param) {
-    var assert = (a, b) => { if (Math.abs(a - b) > 0.01) throw '?' }
+// note these only check library internals, not the actual param behavior
+var sanityChecks = []
+var assert = (a, b) => { if (Math.abs(a - b) > 0.01) throw '?' }
+sanityChecks.push((env, param) => {
     env.initParam(param, 0)
     env.startEnvelope(param, 1)
     env.addHold(param, 1)
@@ -128,4 +128,27 @@ function sanityCheck(env, param) {
     assert(0.75, env.getValueAtTime(param, 3.75))
     assert(1, env.getValueAtTime(param, 4))
     assert(1, env.getValueAtTime(param, 5))
-}
+})
+sanityChecks.push((env, param) => {
+    env.initParam(param, 0)
+    env.startEnvelope(param, 1)
+    env.addSweep(param, 0, 1, 1)
+    assert(0.950, env.getValueAtTime(param, 4))
+    env.addHold(param, 1)
+    env.addHold(param, 1)
+    assert(0.632, env.getValueAtTime(param, 3))
+    assert(0.632, env.getValueAtTime(param, 4))
+})
+sanityChecks.push((env, param) => {
+    env.initParam(param, 0)
+    env.startEnvelope(param, 1)
+    env.addRamp(param, 1, 1)
+    env.startEnvelope(param, 10)
+    env.addRamp(param, 1, 0)
+    assert(0, env.getValueAtTime(param, 1))
+    assert(1, env.getValueAtTime(param, 2))
+    assert(1, env.getValueAtTime(param, 5))
+    assert(1, env.getValueAtTime(param, 10))
+    assert(0, env.getValueAtTime(param, 11))
+})
+
