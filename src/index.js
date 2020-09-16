@@ -46,7 +46,7 @@ export default class Enveloper {
             val = val || this.zeroRampTarget
             param.exponentialRampToValueAtTime(val, time)
         } else if (curr.type === SWEEP) {
-            // no schedule changes needed
+            param.setValueAtTime(val, time)
         }
         debug('start: new envelope from time', time, 'val', val)
     }
@@ -124,7 +124,7 @@ export default class Enveloper {
         ev.k = timeConstant
         ev.tgt = target
         events.push(ev)
-        debug('sweep: to target', target, 'time', t1)
+        debug('sweep: to target', target, 'from time', t0, 'to', t1)
     }
 
 
