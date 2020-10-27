@@ -1,6 +1,20 @@
 
-
 var DEBUG = 0
+
+
+
+/*
+ * 
+ *      notes:
+ *  works by storing an array of event data objects on the param
+ *  note that each event's end time (t1) is what WebAudio cares about,
+ *      so: events cover the time span: (t0, t1]
+ *  also note webaudio doesn't like two events at the same time 
+ *      (except: setValueAtTime SHOULD coincide with end of previous event)
+ * 
+*/
+
+
 
 export default class Enveloper {
 
@@ -12,65 +26,90 @@ export default class Enveloper {
 
     // one-time setup, will remove any existing envelope events
     initParam(param, baseValue) {
-        var time = this.ctx.currentTime
         param.cancelScheduledValues(0)
-        param.setValueAtTime(baseValue, 0)
-        if (time > 0) param.setValueAtTime(baseValue, time)
+        // tack internal data onto param object
         param.__paramEnveloperEvents = [
-            new Event(HOLD, baseValue, baseValue, 0, time)
+            new Event(HOLD, baseValue, baseValue, 0, 0),
         ]
+        param.setValueAtTime(baseValue, 0)
         debug('init:  param base set to', baseValue, 'time 0')
     }
+
 
 
     // starts a new envelope, canceling any subsequent events
     // existing event for that time will be edited to end early
     startEnvelope(param, time) {
-        preprocessEvents(param, this.ctx.currentTime)
-        time = Math.max(time, this.ctx.currentTime)
-        extendEventsToTime(param, time)
+        var now = this.ctx.currentTime
+        if (!(time > now)) time = now
         var events = param.__paramEnveloperEvents
+        var last = events[events.length - 1]
+        // prune events too old to affect the parameter
+        pruneEventsBefore(events, now)
+        // if nothing remains, or if envelope starts after 
+        // last known event, just add a hold and exit
+        if (events.length === 0 || time > last.t1) {
+            var lastVal = last.v1
+            events.push(new Event(HOLD, lastVal, lastVal, 0, time))
+            param.setValueAtTime(lastVal, time)
+            debug('start:  fresh envelope, value', lastVal, ' from time', time)
+            return
+        }
+        // otherwise: envelope starts during an existing event
         var curr = getEventActiveAtTime(events, time)
-        // clear all events after curr
+        if (!curr) throw 'event list conformance bug, should not happen!'
+        // prune any event data after curr
         events.length = events.indexOf(curr) + 1
-        // modify curr event and fix param schedule
-        if (time > 0) param.cancelScheduledValues(time)
+        // if env start coincides with curr end, then no new events to schedule
+        // cancel AFTER t1, so that its end event sticks around
+        if (time === curr.t1) {
+            param.cancelScheduledValues(time + 0.0001)
+            debug('start:  envelope begins: value', last.v1, 'from time', time)
+            return
+        }
+        // otherwise cancel from time exactly
+        param.cancelScheduledValues(time)
+        // edit curr's to end at correct time and value
         var val = getValueDuringEvent(curr, time)
-        curr.t1 = time
         curr.v1 = val
+        curr.t1 = time
+        // and finally, reschedule its end event
+        debug('start:  envelope begins: value', val, 'from time', time)
         if (curr.type === HOLD) {
             param.setValueAtTime(val, time)
+            debug('--set value', val, 'time', time)
         } else if (curr.type === RAMP_LINEAR) {
             param.linearRampToValueAtTime(val, time)
+            debug('--ramp to', val, 'time', time)
         } else if (curr.type === RAMP_EXPO) {
             val = val || this.zeroRampTarget
             param.exponentialRampToValueAtTime(val, time)
+            debug('--exp ramp to', val, 'time', time)
         } else if (curr.type === SWEEP) {
             param.setValueAtTime(val, time)
+            debug('--set value', val, 'time', time)
         }
-        debug('start: new envelope from time', time, 'val', val)
     }
 
 
     // adds a delay to the envelope, holding the previous value
     addHold(param, duration) {
         if (!(duration > 0)) return
-        preprocessEvents(param, this.ctx.currentTime)
         var events = param.__paramEnveloperEvents
         var last = events[events.length - 1]
         if (last.t1 === Infinity) {
-            // hold after an open sweep is a special case, treat it like a cancel
+            // hold after an open sweep is a special case, treat it like a new envelope
             var breakTime = last.t0 + duration
+            debug('hold:   during sweep, start new envelope from time:', breakTime)
             this.startEnvelope(param, breakTime)
-            debug('hold:  broke open sweep at time', breakTime)
         } else {
             var v0 = last.v1
             var t0 = last.t1
             var v1 = v0
             var t1 = t0 + duration
             events.push(new Event(HOLD, v0, v1, t0, t1))
-            param.setValueAtTime(v0, t1)
-            debug('hold:  at val', v0, 'until time', t1)
+            param.setValueAtTime(v1, t1)
+            debug('hold:   val', v1, 'until time', t1)
         }
     }
 
@@ -80,7 +119,6 @@ export default class Enveloper {
         // web audio API doesn't like coincident events
         var minDur = 0.0001
         if (!(duration > minDur)) duration = minDur
-        preprocessEvents(param, this.ctx.currentTime)
         var events = param.__paramEnveloperEvents
         var last = events[events.length - 1]
         var v0 = last.v1
@@ -97,15 +135,15 @@ export default class Enveloper {
         }
         var type = exponential ? RAMP_EXPO : RAMP_LINEAR
         events.push(new Event(type, v0, v1, t0, t1))
-        debug('ramp:  to val', v1, 'time', t1)
+        debug('ramp:  to val', v1, 'time', t1, exponential ? 'exp' : 'linear')
     }
+
 
 
     // adds an exponential sweep towards a target
     // for duration > 0, approaches (but will not reach) the target
     // otherwise, extends the envelope forever, approaching the target
     addSweep(param, duration, target, timeConstant) {
-        preprocessEvents(param, this.ctx.currentTime)
         var events = param.__paramEnveloperEvents
         var last = events[events.length - 1]
         var v0 = last.v1
@@ -124,16 +162,15 @@ export default class Enveloper {
         ev.k = timeConstant
         ev.tgt = target
         events.push(ev)
-        debug('sweep: to target', target, 'from time', t0, 'to', t1)
+        debug('sweep: to target', target, 'const', timeConstant, 'from time', t0, 'to', t1)
     }
 
 
     // figure out the planned param value at the given time
     getValueAtTime(param, time) {
-        preprocessEvents(param, this.ctx.currentTime)
         var events = param.__paramEnveloperEvents
         var ev = getEventActiveAtTime(events, time)
-        if (time > ev.t1) return ev.v1
+        if (!ev) return events[events.length - 1].v1
         return getValueDuringEvent(ev, time)
     }
 
@@ -168,42 +205,19 @@ function Event(type, v0, v1, t0, t1) {
 }
 
 
-function preprocessEvents(param, currentTime) {
-    var events = param.__paramEnveloperEvents
-    var last = events[events.length - 1]
-    // events that end before currentTime can no longer affect param
-    var prunable = -1
-    events.some((ev, i) => {
-        if (ev.t1 <= currentTime) return true
-        prunable = i
-    })
-    if (prunable >= 0) events.splice(0, prunable + 1)
-    // if queue is now empty, extend it to currentTime
-    if (events.length === 0) {
-        var val = last.v1
-        param.setValueAtTime(val, currentTime)
-        events.push(new Event(HOLD, val, val, 0, currentTime))
+function pruneEventsBefore(events, time) {
+    // prune events that END BEFORE specified time
+    while (events.length > 0 && events[0].t1 < time) {
+        events.shift()
     }
 }
 
-function extendEventsToTime(param, t) {
-    // if event queue ends before t, extend it
-    var events = param.__paramEnveloperEvents
-    var last = events[events.length - 1]
-    if (t <= last.t1) return
-    var val = last.v1
-    param.setValueAtTime(val, t)
-    events.push(new Event(HOLD, val, val, last.t1, t))
-}
-
 function getEventActiveAtTime(events, t) {
-    var result = null
-    events.some(ev => {
-        result = ev
-        if (t < ev.t1) return true
-    })
-    if (!result) throw 'Internal problem, time not within event list'
-    return result
+    for (var i = 0; i < events.length; i++) {
+        if (t > events[i].t1) continue
+        return events[i]
+    }
+    return null
 }
 
 function getValueDuringEvent(ev, time) {
@@ -252,6 +266,6 @@ function calculateExpoRampValue(dt, v0, v1, duration) {
 // debuggin'
 var debug = (DEBUG) ? function () {
     console.log.apply(console, Array.prototype.slice.apply(arguments).map(v => {
-        return (typeof v === 'number') ? Math.round(v * 1000) / 1000 : v
+        return (typeof v === 'number') ? Math.round(v * 10000) / 10000 : v
     }))
 } : () => { }

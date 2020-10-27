@@ -7,7 +7,7 @@ var c = document.createElement('canvas')
 c.width = 1000
 c.height = 260
 c.style.backgroundColor = 'black'
-p.style.margin = c.style.margin = '20px'
+p.style.margin = c.style.margin = '20px 50px'
 document.body.appendChild(p)
 document.body.appendChild(c)
 
@@ -151,4 +151,78 @@ sanityChecks.push((env, param) => {
     assert(1, env.getValueAtTime(param, 10))
     assert(0, env.getValueAtTime(param, 11))
 })
+
+
+
+
+
+
+// add some test cases
+
+// page elements
+var div = document.createElement('div')
+div.style.margin = '20px 50px'
+document.body.appendChild(div)
+div.innerHTML = 'ad-hoc test cases'
+
+var addTest = (name, fn) => {
+    var b = document.createElement('button')
+    b.style.margin = '10px'
+    b.style.padding = '10px'
+    b.innerText = '' + name
+    b.onclick = () => {
+        if (!audio) initAudio()
+        fn(audio.enveloper, audio.param, audio.ctx.currentTime + 0.1)
+    }
+    div.appendChild(b)
+}
+
+addTest('break', (env, param, t) => {
+    env.startEnvelope(param, t)
+})
+addTest('sweep', (env, param, t) => {
+    env.startEnvelope(param, t)
+    env.addRamp(param, 0.5, 0.9)
+    env.addSweep(param, -1, 0, 0.4)
+})
+addTest('ramps', (env, param, t) => {
+    env.startEnvelope(param, t)
+    for (var i = 0; i < 20; i++) {
+        env.addRamp(param, 0.1, (i % 2) ? 0.3 : 0.7)
+    }
+})
+
+function adsr(env, param, a, h, d, r) {
+    env.addRamp(param, a, 1)
+    env.addHold(param, h)
+    env.addRamp(param, d, 0.8, true)
+    env.addSweep(param, -1, 0, r)
+}
+
+addTest('adsr', (env, param, t) => {
+    env.startEnvelope(param, t)
+    adsr(env, param, 0.2, 0.2, 0.4, 0.4)
+})
+
+addTest('rel', (env, param, t) => {
+    env.startEnvelope(param, t)
+    adsr(env, param, 0.2, 0.2, 0.4, 0.4)
+    env.startEnvelope(param, t + 0.2)
+    env.addSweep(param, -1, 0, 0.2)
+})
+
+addTest('rel', (env, param, t) => {
+    env.startEnvelope(param, t)
+    adsr(env, param, 0.2, 0.2, 0.4, 0.4)
+    env.startEnvelope(param, t + 0.4)
+    env.addSweep(param, -1, 0, 0.2)
+})
+
+addTest('rel', (env, param, t) => {
+    env.startEnvelope(param, t)
+    adsr(env, param, 0.2, 0.2, 0.4, 0.4)
+    env.startEnvelope(param, t + 0.8)
+    env.addSweep(param, -1, 0, 0.2)
+})
+
 

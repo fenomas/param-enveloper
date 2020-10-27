@@ -1,6 +1,6 @@
 {
   "name": "param-enveloper",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "description": "A sane way to automate parameters in WebAudio",
   "main": "src/index.js",
   "files": [
