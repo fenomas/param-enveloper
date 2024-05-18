@@ -1,105 +1,95 @@
-
 ## param-enveloper
 
-----
+---
 
-Hey look, finally a sane way to automate parameters in Web Audio.
+Hey look, finally a sane way to use parameters in Web Audio.
 
-This is a small library for automating changes to an 
+This is a small library for automating changes to an
 [AudioParam](https://developer.mozilla.org/en-US/docs/Web/API/AudioParam)
 (like a signal's gain or frequency).
-It lets you schedule any series of ramps, sweeps, and delays,
-and then later cancel at any arbitrary time and schedule new changes, 
-*without* causing discontinuities (i.e. audible clicks).
+It lets you schedule any series of ramps, sweeps, and delays, at arbitrary times,
+_without_ causing discontinuities (i.e. audible clicks or glitches).
 
-(That may not sound like much, but suffice to say that the 
-WebAudio API makes it **very** difficult, and this library makes it very easy.)
+(That may not sound like much, but suffice to say that the
+WebAudio API makes it very difficult, and this library makes it very easy.)
 
 [Live demo](http://fenomas.github.io/param-enveloper/)
 
 ## Example
 
-```js
-var A=0.1, H=0.01, S=0.5, D=0.2, R=0.5  // or whatever
-var param = masterVolumeNode.gain
+```ts
+import { Enveloper } from 'param-enveloper';
 
-// initialize, starting from 0 since this is a gain node
-enveloper.initParam(param, 0)
+const env = new Enveloper(myAudioContext);
 
-// play a note by making an ADHSR envelope...
-enveloper.startEnvelope(param, startTime)
-enveloper.addRamp(param, A, 1)
-enveloper.addHold(param, H)
-enveloper.addSweep(param, -1, S, D)
+// initialize a param, with starting value=0 since this is a gain node
+const param = masterVolume.gain;
+env.initParam(param, 0);
 
-// later, when the note release is triggered..
-enveloper.startEnvelope(param, releaseTime)
-enveloper.addRamp(param, R, 0, true)
+// to play a note, first declare the time it starts:
+env.startEnvelope(param, startTime);
+
+// then schedule an AHDSR envelope
+env.addRamp(param, A, 1);
+env.addHold(param, H);
+env.addSweep(param, D, S, 0.2);
+
+// later to release the note, start a new envelope and schedule an exponential ramp to 0
+env.startEnvelope(param, releaseTime);
+env.addRamp(param, R, 0, true);
+
+// you can also query the scheduled param value at arbitrary times:
+console.log(env.getValueAtTime(param, ctx.currentTime + 0.5))
 ```
 
-The second call to `startEnvelope` calculates what value the param is 
-scheduled to have at `releaseTime` and edits the current envelope to 
-end at that value. This way any subsequent automation happens without discontinuities, even if a release happens during the attack ramp or whatever.
-
+The special sauce here is that you can start a new envelope any time
+(in response to user input, etc), and the param events you schedule afterwards will
+sound fine even if the new envelope starts in the middle of an ongoing ramp/sweep/etc.
 
 ## Usage
 
-Install via npm:
+Install via npm/yarn/bun:
 
 ```sh
 npm i --save param-enveloper
 ```
 
-```js
-import Enveloper from 'param-enveloper'
-var enveloper = new Enveloper(audioCtx)
-enveloper.initParam(param, baseValue)
+```ts
+import { Enveloper } from 'param-enveloper';
+var enveloper = new Enveloper(audioCtx);
+enveloper.initParam(param, baseValue);
 // ...
 ```
 
 ## API
 
- * `var env = new Enveloper(ctx)`  
-   Constructor takes an `AudioContext` reference.
+The API is documented in JSDoc comments; consult your local tooltip for details.
 
- * `env.initParam(param, baseValue)`  
-   Any param to be automated should be initted once. `baseValue` is the value the param will initially transition from.
+```ts
+import { Enveloper } from 'param-enveloper';
 
- * `env.startEnvelope(param, time)`  
-   Start a new envelope from `time`, canceling any subsequent changes. 
-   If an envelope was already scheduled, it will be edited to end at whatever value it would have had at the specified time.
-
- * `env.addHold(param, duration)`  
-   Hold the current value for the given duration.
-
- * `env.addRamp(param, duration, target, isExponential)`  
-   Ramp from the current value to a new target. By default ramps are linear; set the final argument to true for an exponential ramp.
-
- * `env.addSweep(param, duration, target, timeConst)`  
-   Adds a sweep towards the given target value. Remember that sweeps approach the specified target value, but never completely reach it.  
-   If `duration` is a positive number, the sweep will last for the specified time and then end. Otherwise, the sweep will continue forever or until a new envelope is started (with `startEnvelope`).
-
- * `env.getValueAtTime(param, time)`  
-   Queries what value the param is scheduled to have at a given time. Useful for e.g. making an attack ramp whose duration depends on the value started from.
-
-> Note: When a sweep is added with non-positive duration, it is treated as 
-an open-ended sweep that lasts forever. Scheduling a ramp or another sweep 
-after this will throw an error; to add subsequent events either start a new envelope, or schedule a hold (whose duration will become the sweep's duration).
-
+class Enveloper {
+  constructor(ctx: AudioContext);
+  initParam(audioParam: AudioParam, initialValue = 0);
+  startEnvelope(audioParam: AudioParam, time = 0);
+  addHold(audioParam: AudioParam, duration: number);
+  addRamp(audioParam: AudioParam, duration: number, target: number, exponential = false);
+  addSweep(audioParam: AudioParam, duration: number, target: number, timeConstant: number);
+  getValueAtTime(audioParam: AudioParam, time: number);
+}
+```
 
 ## Notes
 
-To hack on this, use the local npm `build` / `start` scripts. 
-If you don't have webpack installed globally, you'll need to do 
-`npm i -D webpack webpack-cli webpack-dev-server` or similar.
+To hack on this, use the local npm `build` / `start` scripts.
 
-Currently this library doesn't do much heavy error checking - 
-doing unexpected things (e.g. scheduling events in the past) 
+Currently this library doesn't do much heavy error checking -
+doing unexpected things (e.g. scheduling events in the past)
 might throw errors or have undefined behavior.
 
-----
+---
 
 ## By
 
-Made with 🍺 by [Andy Hall](https://twitter.com/fenomas). 
+Made with 🍺 by [andy](https://fenomas.com).
 License is ISC.

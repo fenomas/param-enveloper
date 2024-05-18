@@ -4,12 +4,29 @@
   "description": "A sane way to automate parameters in WebAudio",
   "main": "src/index.js",
   "files": [
-    "/src"
+    "/dist"
   ],
   "scripts": {
-    "build": "cd demo && webpack --env.production",
-    "start": "cd demo && webpack-dev-server"
+    "build": "bun tools/build.ts",
+    "prepack": "bun run build",
+    "start": "while true; do bun test --watch --bail src/ ; sleep 2; done",
+    "start-demo": "bun --watch build ./demo/demo.ts --outdir ./docs --minify --target node"
   },
   "author": "Andy Hall",
-  "license": "ISC"
+  "license": "ISC",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/fenomas/param-enveloper.git"
+  },
+  "packageManager": "bun@1.1.5",
+  "devDependencies": {
+    "@types/bun": "^1.1.0",
+    "typescript": "^5.4.5",
+    "typescript-eslint": "^7.8.0"
+  },
+  "prettier": {
+    "singleQuote": true,
+    "trailingComma": "all",
+    "printWidth": 100
+  }
 }
