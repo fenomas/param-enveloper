@@ -1,4 +1,4 @@
-import { Enveloper } from '../dist';
+import { Enveloper } from '..';
 import { testEnvelopes } from './testEnvelopes';
 
 /*
