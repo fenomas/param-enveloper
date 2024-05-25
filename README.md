@@ -2,7 +2,7 @@
 
 ---
 
-Hey look, finally a sane way to use parameters in Web Audio.
+Hey look! A sane way to use parameters in WebAudio.
 
 This is a small library for automating changes to an
 [AudioParam](https://developer.mozilla.org/en-US/docs/Web/API/AudioParam)
@@ -11,7 +11,7 @@ It lets you schedule any series of ramps, sweeps, and delays, at arbitrary times
 _without_ causing discontinuities (i.e. audible clicks or glitches).
 
 (That may not sound like much, but suffice to say that the
-WebAudio API makes it very difficult, and this library makes it very easy.)
+WebAudio API makes it difficult, and this library makes it easy.)
 
 [Live demo](http://fenomas.github.io/param-enveloper/)
 
@@ -39,7 +39,7 @@ env.startEnvelope(param, releaseTime);
 env.addRamp(param, R, 0, true);
 
 // you can also query the scheduled param value at arbitrary times:
-console.log(env.getValueAtTime(param, ctx.currentTime + 0.5))
+const val = env.getValueAtTime(param, ctx.currentTime + 0.5);
 ```
 
 The special sauce here is that you can start a new envelope any time
@@ -70,22 +70,18 @@ import { Enveloper } from 'param-enveloper';
 
 class Enveloper {
   constructor(ctx: AudioContext);
-  initParam(audioParam: AudioParam, initialValue = 0);
-  startEnvelope(audioParam: AudioParam, time = 0);
-  addHold(audioParam: AudioParam, duration: number);
-  addRamp(audioParam: AudioParam, duration: number, target: number, exponential = false);
-  addSweep(audioParam: AudioParam, duration: number, target: number, timeConstant: number);
-  getValueAtTime(audioParam: AudioParam, time: number);
+  initParam(param: AudioParam, initialValue = 0);
+  startEnvelope(param: AudioParam, time = 0);
+  addHold(param: AudioParam, duration: number);
+  addRamp(param: AudioParam, duration: number, target: number, exponential = false);
+  addSweep(param: AudioParam, duration: number, target: number, timeConstant: number);
+  getValueAtTime(param: AudioParam, time: number);
 }
 ```
 
 ## Notes
 
-To hack on this, use the local npm `build` / `start` scripts.
-
-Currently this library doesn't do much heavy error checking -
-doing unexpected things (e.g. scheduling events in the past)
-might throw errors or have undefined behavior.
+To hack on this, use the local `build` / `start` scripts. Contributions welcome!
 
 ---
 
