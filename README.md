@@ -72,10 +72,10 @@ class Enveloper {
   constructor(ctx: AudioContext);
   initParam(param: AudioParam, initialValue = 0);
   startEnvelope(param: AudioParam, time = 0);
+  getValueAtTime(param: AudioParam, time: number);
   addHold(param: AudioParam, duration: number);
   addRamp(param: AudioParam, duration: number, target: number, exponential = false);
   addSweep(param: AudioParam, duration: number, target: number, timeConstant: number);
-  getValueAtTime(param: AudioParam, time: number);
 }
 ```
 
