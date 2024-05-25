@@ -1,4 +1,4 @@
-import { Enveloper } from '..';
+import { Enveloper } from '../src/';
 import { testEnvelopes } from './testEnvelopes';
 
 /*
@@ -83,7 +83,11 @@ function initAudio() {
 
   const enveloper = new Enveloper(ctx);
   const param = gain.gain;
+  enveloper.initParam(param, 0);
   enveloper.startEnvelope(param, 0);
+  enveloper.addRamp(param, 0.04, 0.5);
+  enveloper.addSweep(param, 0.5, 0, 0.5);
+
   audio = { ctx, enveloper, param };
 
   //

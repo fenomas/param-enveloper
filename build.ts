@@ -1,9 +1,8 @@
 import html from 'bun-plugin-html';
 import dts from 'bun-plugin-dts';
 
-// build core lib
+// build exported library and types
 await Bun.build({
-  root: '..',
   entrypoints: ['./src/index.ts'],
   outdir: './dist',
   minify: true,
@@ -13,7 +12,6 @@ await Bun.build({
 
 // build demo
 await Bun.build({
-  root: '..',
   entrypoints: ['./demo/index.html'],
   outdir: './docs',
   minify: true,

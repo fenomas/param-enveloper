@@ -1,16 +1,20 @@
 {
   "name": "param-enveloper",
   "version": "0.4.0",
+  "type": "module",
   "description": "A sane way to automate WebAudio parameters",
-  "main": "src/index.js",
   "files": [
     "/dist"
   ],
+  "module": "./dist/index.js",
+  "exports": {
+    ".": {
+      "import": "./dist/index.js"
+    }
+  },
   "scripts": {
-    "build": "bun tools/build.ts",
-    "prepack": "bun run build",
-    "start": "while true; do bun test --watch --bail src/ ; sleep 2; done",
-    "start-demo": "bun --watch build ./demo/demo.ts --outdir ./docs --minify --target node"
+    "start": "vite",
+    "build": "bun build.ts"
   },
   "author": "Andy Hall",
   "license": "ISC",
@@ -21,8 +25,10 @@
   "packageManager": "bun@1.1.5",
   "devDependencies": {
     "@types/bun": "^1.1.0",
+    "bun-plugin-dts": "^0.2.3",
     "typescript": "^5.4.5",
-    "typescript-eslint": "^7.8.0"
+    "typescript-eslint": "^7.8.0",
+    "vite": "^5.2.11"
   },
   "prettier": {
     "singleQuote": true,

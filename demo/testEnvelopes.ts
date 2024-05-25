@@ -1,4 +1,4 @@
-import { Enveloper } from '..';
+import { Enveloper } from '../src/';
 
 type TestFn = (env: Enveloper, param: AudioParam, t: number) => void;
 
@@ -25,16 +25,11 @@ addTest('ramps', (env, param, t) => {
   }
 });
 
-function adsr(env: Enveloper, param: AudioParam, a = 0, h = 0, d = 0, r = 0) {
-  env.addRamp(param, a, 1);
-  env.addHold(param, h);
-  env.addRamp(param, d, 0.8, true);
-  env.addSweep(param, -1, 0, r);
-}
-
 addTest('adsr', (env, param, t) => {
   env.startEnvelope(param, t);
-  adsr(env, param, 0.1, 0.1, 0.4, 0.5);
+  env.addRamp(param, 0.15, 1);
+  env.addHold(param, 0.05);
+  env.addRamp(param, 0.3, 0.5, true);
 });
 
 addTest('release', (env, param, t) => {
