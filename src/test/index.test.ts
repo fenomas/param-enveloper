@@ -1,5 +1,13 @@
-import { describe, it, expect } from 'bun:test';
-import { Enveloper } from '..';
+import { describe, it } from 'node:test';
+import { strictEqual, ok } from 'node:assert';
+
+import { Enveloper } from '../index';
+
+// convert these eventually
+const expect = (a: any) => ({
+  toBe: (b: any) => strictEqual(a, b),
+  toBeCloseTo: (b: any) => ok(Math.abs(a - b) < 0.001),
+});
 
 //
 //    MOCKS

@@ -1,5 +1,13 @@
-import { describe, it, expect } from 'bun:test';
+import { describe, it } from 'node:test';
+import { strictEqual, ok } from 'node:assert';
+
 import { ParamEvent, getEventIndexAtTime, getValueDuringEvent } from '../paramEvent';
+
+// convert these eventually
+const expect = (a: any) => ({
+  toBe: (b: any) => strictEqual(a, b),
+  toBeCloseTo: (b: any) => ok(Math.abs(a - b) < 0.01),
+});
 
 //
 //
@@ -71,6 +79,6 @@ describe('getValueDuringEvent', () => {
     const ev = new ParamEvent('RAMP_EXPO', v0, v1, t0, t1);
     expect(getValueDuringEvent(ev, t0)).toBe(v0);
     expect(getValueDuringEvent(ev, t1)).toBe(v1);
-    expect(getValueDuringEvent(ev, (t0 + t1) / 2)).toBeCloseTo(622, 0);
+    expect(getValueDuringEvent(ev, (t0 + t1) / 2)).toBeCloseTo(622.25);
   });
 });

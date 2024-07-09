@@ -69,7 +69,7 @@ The API is documented in JSDoc comments; consult your local tooltip for details.
 import { Enveloper } from 'param-enveloper';
 
 class Enveloper {
-  constructor(ctx: AudioContext);
+  constructor(ctx: AudioContext | OfflineAudioContext);
   initParam(param: AudioParam, initialValue = 0);
   startEnvelope(param: AudioParam, time = 0);
   getValueAtTime(param: AudioParam, time: number);

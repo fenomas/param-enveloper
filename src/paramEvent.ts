@@ -35,7 +35,7 @@ export class ParamEvent {
  * Assumes that events cover the span (t0, t1].
  */
 export function getEventIndexAtTime(events: ParamEvent[], time: number) {
-  if (events.length === 0) return -1;
+  if (!events[0]) return -1;
   if (time <= events[0].t0) return -1;
   return events.findIndex((ev) => time <= ev.t1);
 }

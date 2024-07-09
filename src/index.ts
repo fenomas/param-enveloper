@@ -37,10 +37,10 @@ function maybeInitParam(param: AudioParam | DecoratedParam) {
  * @param ctx - the AudioContext your AudioParams belong to
  */
 export class Enveloper {
-  ctx: AudioContext;
+  ctx: AudioContext | OfflineAudioContext;
   zeroRampTarget: number;
 
-  constructor(ctx: AudioContext) {
+  constructor(ctx: AudioContext | OfflineAudioContext) {
     this.ctx = ctx;
     this.zeroRampTarget = 0.001;
   }
@@ -68,9 +68,10 @@ export class Enveloper {
   startEnvelope(audioParam: AudioParam, time = 0) {
     const param = maybeInitParam(audioParam);
     const events = param.__paramEnveloperEvents;
-    const last = events[events.length - 1];
+    const last = events.at(-1);
     const now = this.ctx.currentTime;
     const env_t0 = Math.max(time, now);
+    if (!last) return warnAboutInternalError();
 
     // bookkeeping: prune any unneeded event data in the past
     if (now >= last.t1) {
@@ -98,7 +99,7 @@ export class Enveloper {
     }
 
     // remaining case: envelope starts during a scheduled event, so prune later data
-    const curr = events[currIx];
+    const curr = events[currIx] as ParamEvent;
     events.length = currIx + 1;
 
     // if curr event ends right as envelope starts, leave its end event and schedule nothing
@@ -140,6 +141,7 @@ export class Enveloper {
     const param = maybeInitParam(audioParam);
     const events = param.__paramEnveloperEvents;
     const last = events[events.length - 1];
+    if (!last) return warnAboutInternalError();
 
     if (last.t1 === Infinity) {
       // unlike other events, treat a hold after an infinite sweep as starting a new envelope
@@ -166,6 +168,7 @@ export class Enveloper {
     const param = maybeInitParam(audioParam);
     const events = param.__paramEnveloperEvents;
     const last = events[events.length - 1];
+    if (!last) return warnAboutInternalError();
     if (last.t1 === Infinity) return warnAboutIgnoredEvent();
 
     const t0 = last.t1;
@@ -195,6 +198,7 @@ export class Enveloper {
     const param = maybeInitParam(audioParam);
     const events = param.__paramEnveloperEvents;
     const last = events[events.length - 1];
+    if (!last) return warnAboutInternalError();
     if (last.t1 === Infinity) return warnAboutIgnoredEvent();
 
     // audioparam event:
@@ -224,10 +228,12 @@ export class Enveloper {
     const events = param.__paramEnveloperEvents;
     const ix = getEventIndexAtTime(events, time);
     if (ix < 0) {
-      if (time <= events[0].t0) return events[0].v0;
-      return events[events.length - 1].v1;
+      if (events[0] && time <= events[0].t0) return events[0].v0;
+      return (events.at(-1) as ParamEvent).v1;
     }
-    return getValueDuringEvent(events[ix], time);
+    if (events[ix]) return getValueDuringEvent(events[ix], time);
+    warnAboutInternalError();
+    return 0;
   }
 }
 
@@ -237,6 +243,9 @@ function warnAboutIgnoredEvent() {
 }
 function warnAboutDuration(dur: number) {
   console.warn('ParamEnveloper: ignoring event invalid duration', dur);
+}
+function warnAboutInternalError() {
+  console.warn('ParamEnveloper: internal error! Event queue was empty');
 }
 
 // debuggin'

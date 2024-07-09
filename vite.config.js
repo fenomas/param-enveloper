@@ -1,6 +1,6 @@
 import { defineConfig } from 'vite';
 
-// use this for locally serving the demo page, since bun can't
+// used for locally serving the demo page, and building it to `/docs/` for GitHub Pages
 export default defineConfig({
   root: 'demo/',
   base: './',

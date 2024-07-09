@@ -1,34 +1,33 @@
 {
   "name": "param-enveloper",
   "version": "0.4.0",
-  "type": "module",
   "description": "A sane way to automate WebAudio parameters",
+  "type": "module",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
   "files": [
-    "/dist"
+    "./dist"
   ],
-  "module": "./dist/index.js",
-  "exports": {
-    ".": {
-      "import": "./dist/index.js"
-    }
-  },
   "scripts": {
     "start": "vite",
-    "build": "bun build.ts"
+    "test": "tsx --test",
+    "dev": "tsx --watch --test",
+    "build-demo": "vite build",
+    "build-lib": "tsc --project ./tsconfig.build.json",
+    "build": "pnpm run build-demo; pnpm run build-lib"
   },
-  "author": "Andy Hall",
+  "author": "andy@fenomas.com",
   "license": "ISC",
   "repository": {
     "type": "git",
     "url": "https://github.com/fenomas/param-enveloper.git"
   },
-  "packageManager": "bun@1.1.5",
   "devDependencies": {
-    "@types/bun": "^1.1.0",
-    "bun-plugin-dts": "^0.2.3",
-    "typescript": "^5.4.5",
-    "typescript-eslint": "^7.8.0",
-    "vite": "^5.2.11"
+    "@types/node": "^20.14.10",
+    "tsx": "^4.16.2",
+    "typescript": "^5.5.3",
+    "typescript-eslint": "^7.16.0",
+    "vite": "^5.3.3"
   },
   "prettier": {
     "singleQuote": true,
