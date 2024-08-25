@@ -4,9 +4,9 @@ import { strictEqual, ok } from 'node:assert';
 import { Enveloper } from '../index';
 
 // convert these eventually
-const expect = (a: any) => ({
-  toBe: (b: any) => strictEqual(a, b),
-  toBeCloseTo: (b: any) => ok(Math.abs(a - b) < 0.001),
+const expect = (a: unknown) => ({
+  toBe: (b: unknown) => strictEqual(a, b),
+  toBeCloseTo: (b: unknown) => ok(Math.abs((a as number) - (b as number)) < 0.001),
 });
 
 //

@@ -63,14 +63,14 @@ export function getValueDuringEvent(ev: ParamEvent, time: number) {
  *
  */
 
-function calculateSweepValue(dt = 0.1, v0 = 0, v1 = 1, timeConst = 0.1) {
+function calculateSweepValue(dt: number, v0: number, v1: number, timeConst: number) {
   return v1 + (v0 - v1) * Math.exp(-dt / timeConst);
 }
 
-function calculateLinearRampValue(dt = 0.1, v0 = 0, v1 = 0, duration = 1) {
+function calculateLinearRampValue(dt: number, v0: number, v1: number, duration: number) {
   return v0 + ((v1 - v0) * dt) / duration;
 }
 
-function calculateExpoRampValue(dt = 0.1, v0 = 0, v1 = 0, duration = 1) {
+function calculateExpoRampValue(dt: number, v0: number, v1: number, duration: number) {
   return v0 * Math.pow(v1 / v0, dt / duration);
 }

@@ -68,6 +68,7 @@ export class Enveloper {
   startEnvelope(audioParam: AudioParam, time = 0) {
     const param = maybeInitParam(audioParam);
     const events = param.__paramEnveloperEvents;
+    
     const last = events.at(-1);
     const now = this.ctx.currentTime;
     const env_t0 = Math.max(time, now);

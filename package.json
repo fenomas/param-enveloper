@@ -14,7 +14,11 @@
     "dev": "tsx --watch --test",
     "build-demo": "vite build",
     "build-lib": "tsc --project ./tsconfig.build.json",
-    "build": "pnpm run build-demo; pnpm run build-lib"
+    "build": "pnpm run build-lib && pnpm run build-demo"
+  },
+  "engines": {
+    "node": ">=20",
+    "pnpm": ">=8"
   },
   "author": "andy@fenomas.com",
   "license": "ISC",
@@ -23,11 +27,10 @@
     "url": "https://github.com/fenomas/param-enveloper.git"
   },
   "devDependencies": {
-    "@types/node": "^20.14.10",
-    "tsx": "^4.16.2",
-    "typescript": "^5.5.3",
-    "typescript-eslint": "^7.16.0",
-    "vite": "^5.3.3"
+    "tsx": "^4.18.0",
+    "typescript": "^5.5.4",
+    "typescript-eslint": "^8.2.0",
+    "vite": "^5.4.2"
   },
   "prettier": {
     "singleQuote": true,
