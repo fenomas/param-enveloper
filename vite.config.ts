@@ -1,9 +1,9 @@
-import { defineConfig } from 'vite';
+import { defineConfig } from 'vite'
 
 // used for locally serving the demo page, and building it to `/docs/` for GitHub Pages
 export default defineConfig({
   root: 'demo/',
-  base: './',
+  base: '',
 
   build: {
     target: 'es2020',
@@ -19,4 +19,4 @@ export default defineConfig({
 
   clearScreen: false,
   logLevel: 'info',
-});
+})

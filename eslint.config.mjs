@@ -8,7 +8,7 @@ export default [
   // pluginJs.configs.recommended,
   ...tseslint.configs.strict,
   ...tseslint.configs.stylistic,
-  ...tseslint.configs.recommendedTypeChecked,
+  // ...tseslint.configs.recommendedTypeChecked,
   {
     rules: {
       'prefer-const': 'error',
@@ -16,3 +16,4 @@ export default [
     },
   },
 ];
+ 

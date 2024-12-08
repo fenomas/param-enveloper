@@ -33,9 +33,11 @@
     "vite-plugin-dts": "^4.0.3"
   },
   "prettier": {
-    "singleQuote": true,
-    "trailingComma": "all",
-    "printWidth": 100
+    "printWidth": 100,
+    "trailingComma": "es5",
+    "tabWidth": 2,
+    "semi": false,
+    "singleQuote": true
   },
   "packageManager": "pnpm@9.5.0+sha1.8c155dc114e1689d18937974f6571e0ceee66f1d"
 }

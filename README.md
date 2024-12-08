@@ -18,28 +18,28 @@ WebAudio API makes it difficult, and this library makes it easy.)
 ## Example
 
 ```ts
-import { Enveloper } from 'param-enveloper';
+import { Enveloper } from 'param-enveloper'
 
-const env = new Enveloper(myAudioContext);
+const env = new Enveloper(myAudioContext)
 
 // initialize a param, with starting value=0 since this is a gain node
-const param = masterVolume.gain;
-env.initParam(param, 0);
+const param = masterVolume.gain
+env.initParam(param, 0)
 
 // to play a note, first declare the time it starts:
-env.startEnvelope(param, startTime);
+env.startEnvelope(param, startTime)
 
 // then schedule an AHDSR envelope - A/H/D are durations in seconds
-env.addRamp(param, A, 1);           // linear attack ramp to gain=1
-env.addHold(param, H);              // hold current gain
-env.addRamp(param, D, 0.5, true);   // exponential decay ramp to gain=0.5
+env.addRamp(param, A, 1) //           linear attack ramp to gain=1
+env.addHold(param, H) //              hold current gain
+env.addRamp(param, D, 0.5, true) //   exponential decay ramp to gain=0.5
 
 // to schedule later changes like a release, start a new envelope
-env.startEnvelope(param, releaseTime);
-env.addSweep(param, -1, 0, 0.2);    // -1 duration means open-ended sweep
+env.startEnvelope(param, releaseTime)
+env.addSweep(param, -1, 0, 0.2) //    -1 duration means open-ended sweep
 
 // you can also query the scheduled param value at arbitrary times:
-const val = env.getValueAtTime(param, ctx.currentTime + 0.5);
+const val = env.getValueAtTime(param, ctx.currentTime + 0.5)
 ```
 
 The special sauce here is that you can start a new envelope any time
@@ -51,13 +51,13 @@ discontinuities, even if the new envelope starts during an ongoing ramp/sweep/et
 Install via npm/yarn/bun:
 
 ```sh
-npm i --save param-enveloper
+pnpm i --save param-enveloper    # or npm/yarn/etc
 ```
 
 ```ts
-import { Enveloper } from 'param-enveloper';
-var enveloper = new Enveloper(audioCtx);
-enveloper.initParam(param, baseValue);
+import { Enveloper } from 'param-enveloper'
+var enveloper = new Enveloper(audioCtx)
+enveloper.initParam(param, baseValue)
 // ...
 ```
 
@@ -66,16 +66,16 @@ enveloper.initParam(param, baseValue);
 The API is documented in JSDoc comments; consult your local tooltip for details.
 
 ```ts
-import { Enveloper } from 'param-enveloper';
+import { Enveloper } from 'param-enveloper'
 
 class Enveloper {
-  constructor(ctx: AudioContext | OfflineAudioContext);
-  initParam(param: AudioParam, initialValue = 0);
-  startEnvelope(param: AudioParam, time = 0);
-  getValueAtTime(param: AudioParam, time: number);
-  addHold(param: AudioParam, duration: number);
-  addRamp(param: AudioParam, duration: number, target: number, exponential = false);
-  addSweep(param: AudioParam, duration: number, target: number, timeConstant: number);
+  constructor(ctx: AudioContext | OfflineAudioContext)
+  initParam(param: AudioParam, initialValue = 0)
+  startEnvelope(param: AudioParam, time = 0)
+  getValueAtTime(param: AudioParam, time: number)
+  addHold(param: AudioParam, duration: number)
+  addRamp(param: AudioParam, duration: number, target: number, exponential = false)
+  addSweep(param: AudioParam, duration: number, target: number, timeConstant: number)
 }
 ```
 
