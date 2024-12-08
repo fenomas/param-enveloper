@@ -9,7 +9,7 @@
     "./dist"
   ],
   "scripts": {
-    "start": "vite",
+    "dev": "vite",
     "test": "tsx --test",
     "build-demo": "vite build",
     "build-lib": "vite build --config vite.config.lib.ts",
