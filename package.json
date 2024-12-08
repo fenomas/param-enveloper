@@ -32,6 +32,11 @@
     "vite": "^6.0.3",
     "vite-plugin-dts": "^4.3.0"
   },
+  "pnpm": {
+    "overrides": {
+      "cross-spawn": "^7.0.5"
+    }
+  },
   "prettier": {
     "printWidth": 100,
     "trailingComma": "es5",
