@@ -29,22 +29,22 @@ env.initParam(param, 0);
 // to play a note, first declare the time it starts:
 env.startEnvelope(param, startTime);
 
-// then schedule an AHDSR envelope
-env.addRamp(param, A, 1);
-env.addHold(param, H);
-env.addSweep(param, D, S, 0.2);
+// then schedule an AHDSR envelope - A/H/D are durations in seconds
+env.addRamp(param, A, 1);           // linear attack ramp to gain=1
+env.addHold(param, H);              // hold current gain
+env.addRamp(param, D, 0.5, true);   // exponential decay ramp to gain=0.5
 
-// later to release the note, start a new envelope and schedule an exponential ramp to 0
+// to schedule later changes like a release, start a new envelope
 env.startEnvelope(param, releaseTime);
-env.addRamp(param, R, 0, true);
+env.addSweep(param, -1, 0, 0.2);    // -1 duration means open-ended sweep
 
 // you can also query the scheduled param value at arbitrary times:
 const val = env.getValueAtTime(param, ctx.currentTime + 0.5);
 ```
 
 The special sauce here is that you can start a new envelope any time
-(in response to user input, etc), and the param events you schedule afterwards will
-sound fine even if the new envelope starts in the middle of an ongoing ramp/sweep/etc.
+(in response to user input, etc), and things will just work without causing
+discontinuities, even if the new envelope starts during an ongoing ramp/sweep/etc.
 
 ## Usage
 
